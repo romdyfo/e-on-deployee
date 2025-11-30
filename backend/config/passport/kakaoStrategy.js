@@ -6,13 +6,13 @@ module.exports = (passport) => {
   console.log('✅ passport-kakao 전략 등록 시작');
 
   console.log('✅ KAKAO_ID:', process.env.KAKAO_ID);
-  console.log('✅ CALLBACK URL:', 'http://localhost:4000/auth/kakao/callback');
+  console.log('✅ CALLBACK URL:', `${process.env.BACKEND_URL || 'http://localhost:4000'}/auth/kakao/callback`);
 
   passport.use(
     new KakaoStrategy(
       {
         clientID: process.env.KAKAO_ID,
-        callbackURL: 'http://localhost:4000/auth/kakao/callback',
+        callbackURL: `${process.env.BACKEND_URL || 'http://localhost:4000'}/auth/kakao/callback`,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

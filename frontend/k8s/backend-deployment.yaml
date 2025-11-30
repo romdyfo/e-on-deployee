@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 3 # 파드를 3개 띄워서 부하 분산
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: romdy/e-on-backend:latest # 본인 이미지로 변경
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4000
+          env:
+            # ==========================================
+            # 1. 데이터베이스 연결 정보
+            # ==========================================
+            - name: DB_HOST
+              value: "mysql" # Service 이름과 동일해야 함
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_USER
+              value: "eon"
+            - name: DB_NAME
+              value: "eon_db"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: eon-secrets
+                  key: db-password # MySQL 설정과 같은 키 사용
+
+            # ==========================================
+            # 2. 서버 기본 설정
+            # ==========================================
+            - name: PORT
+              value: "4000"
+            - name: FRONTEND_URL
+              value: "http://34.47.95.143" # 본인 외부 IP로 변경
+
+            # ==========================================
+            # 3. 공공 데이터 API 키 (NEIS, 국토부)
+            # ==========================================
+            - name: NEIS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: eon-secrets
+                  key: neis-api-key
+            - name: REGION_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: eon-secrets
+                  key: region-api-key
+
+            # ==========================================
+            # 4. SMTP (Gmail) 설정
+            # ==========================================
+            - name: SMTP_HOST
+              value: "smtp.gmail.com"
+            - name: SMTP_PORT
+              value: "587"
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: eon-secrets
+                  key: smtp-user
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: eon-secrets
+                  key: smtp-pass
+
+            # ==========================================
+            # 5. 세션 및 OAuth (카카오, 구글, 네이버)
+            # ==========================================
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: eon-secrets
+                  key: session-secret
+
+            - name: KAKAO_ID
+              valueFrom:
+                secretKeyRef:
+                  name: eon-secrets
+                  key: kakao-id
+
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: eon-secrets
+                  key: google-client-id
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: eon-secrets
+                  key: google-client-secret
+
+            - name: NAVER_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: eon-secrets
+                  key: naver-client-id
+            - name: NAVER_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: eon-secrets
+                  key: naver-client-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  type: ClusterIP # 외부 노출 X, 프론트엔드만 접근
+  selector:
+    app: backend
+  ports:
+    - port: 4000
+      targetPort: 4000
