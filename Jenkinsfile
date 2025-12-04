@@ -18,6 +18,12 @@ pipeline {
     }
 
     stages {
+        stage('Debug Workspace') {
+            steps {
+                sh 'pwd'
+                sh 'ls -al'
+            }
+        }
 
         stage('Checkout') {
             steps {
