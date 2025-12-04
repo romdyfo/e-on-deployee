@@ -25,20 +25,18 @@ pipeline {
             }
         }
 
-				stage('Build Images') { //설치했던 도커 파이프라인을 이용해서 하는 것임ㅁ
-                //병렬 제거하고 순차적으로 실행
-                stage('Build Backend') {
-                    steps {
-                        // 백엔드 Dockerfile로 이미지 빌드
-                        sh "docker build -t ${BE_IMAGE_NAME}:latest -f backend/Dockerfile ./backend"
-                    }
-                }
-                stage('Build Frontend') {
-                    steps {
-                        // 프론트엔드 Dockerfile로 이미지 빌드 (build-arg로 API 주소 주입)
-                        sh "docker build --build-arg VITE_API_URL=${VITE_API_URL} -t ${FE_IMAGE_NAME}:latest -f frontend/Dockerfile ./frontend"
-                    }
-                }
+        //병렬 제거하고 순차적으로 실행
+        stage('Build Backend') {
+            steps {
+                // 백엔드 Dockerfile로 이미지 빌드
+                sh "docker build -t ${BE_IMAGE_NAME}:latest -f backend/Dockerfile ./backend"
+            }
+        }
+        stage('Build Frontend') {
+            steps {
+                // 프론트엔드 Dockerfile로 이미지 빌드 (build-arg로 API 주소 주입)
+                sh "docker build --build-arg VITE_API_URL=${VITE_API_URL} -t ${FE_IMAGE_NAME}:latest -f frontend/Dockerfile ./frontend"
+            }
         }
 
         stage('Push Images to Docker Hub') {
@@ -68,6 +66,7 @@ pipeline {
                     verifyDeployments: true])
             }
         }
+    }
         
     post { // 파이프라인이 끝나면 항상 실행
         always {
