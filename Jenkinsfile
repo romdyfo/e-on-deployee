@@ -111,7 +111,11 @@ pipeline {
                     projectId: env.PROJECT_ID,
                     clusterName: env.CLUSTER_NAME,
                     location: env.LOCATION,
-                    manifestPattern: 'k8s/*.yaml',   // 🔥 Jenkins가 여기 찾을 수 있게 해결됨
+                    manifestPattern: [
+                        'k8s/backend-deployment.yaml',
+                        'k8s/frontend-deployment.yaml',
+                        'k8s/mysql-deployment.yaml'
+                    ],
                     credentialsId: env.CREDENTIALS_ID,
                     verifyDeployments: true
                 ])
