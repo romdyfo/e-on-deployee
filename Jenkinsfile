@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    // 🔹 Jenkins 기본 checkout 비활성화 — 필수!
-    options {
-        skipDefaultCheckout(true)
-    }
-
     environment {
         PROJECT_ID    = 'open-source-gcp'
         CLUSTER_NAME  = 'eon-cluster'
@@ -36,9 +31,13 @@ pipeline {
             steps {
                 echo "➡️ Checking out Repository..."
                 // Jenkins에 등록된 GitHub Credential 사용
-                git branch: 'main',
+                git(
+                    branch: 'main',
+                    url: 'https://github.com/romdyfo/e-on-deployee.git',
                     credentialsId: 'github-token',
-                    url: 'https://github.com/romdyfo/e-on-deployee.git'
+                    changelog: false,
+                    poll: false
+                )
             }
         }
 
