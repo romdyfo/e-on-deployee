@@ -118,7 +118,7 @@ kind: Service
 metadata:
   name: backend
 spec:
-  type: ClusterIP # 외부 노출 X, 프론트엔드만 접근
+  type: LoadBalancer
   selector:
     app: backend
   ports:
