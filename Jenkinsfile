@@ -18,6 +18,13 @@ pipeline {
     }
 
     stages {
+
+        stage('Check Files After Checkout') {
+            steps {
+                sh 'echo "📂 Workspace contents:"'
+                sh 'ls -R .'
+            }
+        }
         stage('Debug Workspace') {
             steps {
                 sh 'pwd'
