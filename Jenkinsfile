@@ -92,14 +92,24 @@ pipeline {
             when { branch 'main' }
             steps {
                 echo "🚀 Deploying to GKE..."
-                step([$class: 'KubernetesEngineBuilder',
-                    projectId: env.PROJECT_ID,
-                    clusterName: env.CLUSTER_NAME,
-                    location: env.LOCATION,
-                    manifestPattern: 'k8s/*.yaml',
-                    credentialsId: env.CREDENTIALS_ID,
-                    verifyDeployments: true
-                ])
+                
+                withCredentials([file(credentialsId: env.CREDENTIALS_ID, variable: 'GCP_KEY')]) {
+                    sh """
+                        gcloud auth activate-service-account --key-file=\${GCP_KEY}
+                        gcloud config set project ${env.PROJECT_ID}
+                        gcloud container clusters get-credentials ${env.CLUSTER_NAME} \
+                            --zone ${env.LOCATION} \
+                            --project ${env.PROJECT_ID}
+                        
+                        # k8s 파일 배포
+                        kubectl apply -f k8s/
+                        
+                        # 배포 확인 (MySQL -> Backend -> Frontend 순서)
+                        kubectl rollout status deployment/mysql -n default
+                        kubectl rollout status deployment/backend -n default
+                        kubectl rollout status deployment/frontend -n default
+                    """
+                }
             }
         }
     }
